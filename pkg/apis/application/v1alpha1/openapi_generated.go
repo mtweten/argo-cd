@@ -1773,6 +1773,20 @@ func schema_pkg_apis_application_v1alpha1_ApplicationSourcePlugin(ref common.Ref
 							},
 						},
 					},
+					"tarIncludeFileGlobs": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: "",
+										Type:    []string{"string"},
+										Format:  "",
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		},

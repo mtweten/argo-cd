@@ -391,3 +391,10 @@ func getParametersAnnouncement(ctx context.Context, appDir string, announcements
 	}
 	return repoResponse, nil
 }
+
+func (s *Service) GetDiscoveryEnabled(_ context.Context, _ *apiclient.DiscoveryEnabledRequest) (*apiclient.DiscoveryEnabledResponse, error) {
+	config := s.initConstants.PluginConfig
+	return &apiclient.DiscoveryEnabledResponse{
+		IsDiscoveryEnabled: config.Spec.Discover.FileName != "" || config.Spec.Discover.Find.Glob != "" || len(config.Spec.Discover.Find.Command.Command) > 0,
+	}, nil
+}

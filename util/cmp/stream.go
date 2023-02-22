@@ -84,10 +84,10 @@ func WithTarDoneChan(ch chan<- bool) SenderOption {
 
 // SendRepoStream will compress the files under the given repoPath and send
 // them using the plugin stream sender.
-func SendRepoStream(ctx context.Context, appPath, repoPath string, sender StreamSender, env []string, excludedGlobs []string, opts ...SenderOption) error {
+func SendRepoStream(ctx context.Context, appPath, repoPath string, sender StreamSender, env []string, excludedGlobs []string, includedFileGlobs []string, opts ...SenderOption) error {
 	opt := newSenderOption(opts...)
 
-	tgz, mr, err := GetCompressedRepoAndMetadata(repoPath, appPath, env, excludedGlobs, opt)
+	tgz, mr, err := GetCompressedRepoAndMetadata(repoPath, appPath, env, excludedGlobs, includedFileGlobs, opt)
 	if err != nil {
 		return err
 	}
@@ -105,9 +105,9 @@ func SendRepoStream(ctx context.Context, appPath, repoPath string, sender Stream
 	return nil
 }
 
-func GetCompressedRepoAndMetadata(repoPath string, appPath string, env []string, excludedGlobs []string, opt *senderOption) (*os.File, *pluginclient.AppStreamRequest, error) {
+func GetCompressedRepoAndMetadata(repoPath string, appPath string, env []string, excludedGlobs []string, includedFileGlobs []string, opt *senderOption) (*os.File, *pluginclient.AppStreamRequest, error) {
 	// compress all files in appPath in tgz
-	tgz, filesWritten, checksum, err := tgzstream.CompressFiles(repoPath, nil, excludedGlobs)
+	tgz, filesWritten, checksum, err := tgzstream.CompressFiles(repoPath, nil, excludedGlobs, includedFileGlobs)
 	if filesWritten == 0 {
 		return nil, nil, fmt.Errorf("no files to send")
 	}

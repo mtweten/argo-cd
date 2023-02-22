@@ -389,6 +389,10 @@ spec:
                                   type: string
                               type: object
                             type: array
+                          tarIncludeFileGlobs:
+                            items:
+                              type: string
+                            type: array
                         type: object
                       ref:
                         description: Ref is reference to another source within sources
@@ -651,6 +655,10 @@ spec:
                                       type parameter.
                                     type: string
                                 type: object
+                              type: array
+                            tarIncludeFileGlobs:
+                              items:
+                                type: string
                               type: array
                           type: object
                         ref:
@@ -1025,6 +1033,10 @@ spec:
                               type: string
                           type: object
                         type: array
+                      tarIncludeFileGlobs:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   ref:
                     description: Ref is reference to another source within sources
@@ -1280,6 +1292,10 @@ spec:
                                   parameter.
                                 type: string
                             type: object
+                          type: array
+                        tarIncludeFileGlobs:
+                          items:
+                            type: string
                           type: array
                       type: object
                     ref:
@@ -1684,6 +1700,10 @@ spec:
                                     type: string
                                 type: object
                               type: array
+                            tarIncludeFileGlobs:
+                              items:
+                                type: string
+                              type: array
                           type: object
                         ref:
                           description: Ref is reference to another source within sources
@@ -1951,6 +1971,10 @@ spec:
                                         type parameter.
                                       type: string
                                   type: object
+                                type: array
+                              tarIncludeFileGlobs:
+                                items:
+                                  type: string
                                 type: array
                             type: object
                           ref:
@@ -2363,6 +2387,10 @@ spec:
                                           type: string
                                       type: object
                                     type: array
+                                  tarIncludeFileGlobs:
+                                    items:
+                                      type: string
+                                    type: array
                                 type: object
                               ref:
                                 description: Ref is reference to another source within
@@ -2646,6 +2674,10 @@ spec:
                                               string type parameter.
                                             type: string
                                         type: object
+                                      type: array
+                                    tarIncludeFileGlobs:
+                                      items:
+                                        type: string
                                       type: array
                                   type: object
                                 ref:
@@ -3028,6 +3060,10 @@ spec:
                                       type: string
                                   type: object
                                 type: array
+                              tarIncludeFileGlobs:
+                                items:
+                                  type: string
+                                type: array
                             type: object
                           ref:
                             description: Ref is reference to another source within
@@ -3304,6 +3340,10 @@ spec:
                                           type parameter.
                                         type: string
                                     type: object
+                                  type: array
+                                tarIncludeFileGlobs:
+                                  items:
+                                    type: string
                                   type: array
                               type: object
                             ref:
@@ -3685,6 +3725,10 @@ spec:
                                       type: string
                                   type: object
                                 type: array
+                              tarIncludeFileGlobs:
+                                items:
+                                  type: string
+                                type: array
                             type: object
                           ref:
                             description: Ref is reference to another source within
@@ -3961,6 +4005,10 @@ spec:
                                           type parameter.
                                         type: string
                                     type: object
+                                  type: array
+                                tarIncludeFileGlobs:
+                                  items:
+                                    type: string
                                   type: array
                               type: object
                             ref:

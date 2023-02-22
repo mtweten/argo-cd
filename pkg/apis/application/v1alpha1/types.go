@@ -567,9 +567,10 @@ func escaped(paramName string) string {
 
 // ApplicationSourcePlugin holds options specific to config management plugins
 type ApplicationSourcePlugin struct {
-	Name       string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
-	Env        `json:"env,omitempty" protobuf:"bytes,2,opt,name=env"`
-	Parameters ApplicationSourcePluginParameters `json:"parameters,omitempty" protobuf:"bytes,3,opt,name=parameters"`
+	Name                string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
+	Env                 `json:"env,omitempty" protobuf:"bytes,2,opt,name=env"`
+	Parameters          ApplicationSourcePluginParameters `json:"parameters,omitempty" protobuf:"bytes,3,opt,name=parameters"`
+	TarIncludeFileGlobs []string                          `json:"tarIncludeFileGlobs,omitempty" protobuf:"bytes,4,opt,name=tarIncludeFileGlobs"`
 }
 
 // IsZero returns true if the ApplicationSourcePlugin is considered empty

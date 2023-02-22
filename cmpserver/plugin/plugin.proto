@@ -53,6 +53,13 @@ message ParametersAnnouncementResponse {
     repeated repository.ParameterAnnouncement parameterAnnouncements = 1;
 }
 
+// DiscoveryEnabledResponse returns whether discovery is enabled for the plugin.
+message DiscoveryEnabledResponse {
+    bool isDiscoveryEnabled = 1;
+}
+// DiscoveryEnabledResponse returns whether discovery is enabled for the plugin.
+message DiscoveryEnabledRequest {}
+
 message File {
     bytes chunk = 1;
 }
@@ -70,5 +77,9 @@ service ConfigManagementPluginService {
 
     // GetParametersAnnouncement gets a list of parameter announcements for the given app
     rpc GetParametersAnnouncement(stream AppStreamRequest) returns (ParametersAnnouncementResponse) {
+    }
+
+    // GetDiscoveryEnabled returns whether discovery is enabled for the plugin
+    rpc GetDiscoveryEnabled(DiscoveryEnabledRequest) returns (DiscoveryEnabledResponse) {
     }
 }

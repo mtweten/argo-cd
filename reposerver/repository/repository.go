@@ -1905,6 +1905,8 @@ func runConfigManagementPluginSidecars(ctx context.Context, appPath, repoPath, p
 		return nil, err
 	}
 
+	tarIncludeFileGlobs := q.ApplicationSource.Plugin.TarIncludeFileGlobs
+
 	// detect config management plugin server (sidecar)
 	conn, cmpClient, err := discovery.DetectConfigManagementPlugin(ctx, appPath, pluginName, env, tarExcludedGlobs)
 	if err != nil {
@@ -1913,7 +1915,7 @@ func runConfigManagementPluginSidecars(ctx context.Context, appPath, repoPath, p
 	defer io.Close(conn)
 
 	// generate manifests using commands provided in plugin config file in detected cmp-server sidecar
-	cmpManifests, err := generateManifestsCMP(ctx, appPath, repoPath, env, cmpClient, tarDoneCh, tarExcludedGlobs)
+	cmpManifests, err := generateManifestsCMP(ctx, appPath, repoPath, env, cmpClient, tarDoneCh, tarExcludedGlobs, tarIncludeFileGlobs)
 	if err != nil {
 		return nil, fmt.Errorf("error generating manifests in cmp: %s", err)
 	}
@@ -1936,7 +1938,7 @@ func runConfigManagementPluginSidecars(ctx context.Context, appPath, repoPath, p
 // generateManifestsCMP will send the appPath files to the cmp-server over a gRPC stream.
 // The cmp-server will generate the manifests. Returns a response object with the generated
 // manifests.
-func generateManifestsCMP(ctx context.Context, appPath, repoPath string, env []string, cmpClient pluginclient.ConfigManagementPluginServiceClient, tarDoneCh chan<- bool, tarExcludedGlobs []string) (*pluginclient.ManifestResponse, error) {
+func generateManifestsCMP(ctx context.Context, appPath, repoPath string, env []string, cmpClient pluginclient.ConfigManagementPluginServiceClient, tarDoneCh chan<- bool, tarExcludedGlobs []string, tarIncludeFileGlobs []string) (*pluginclient.ManifestResponse, error) {
 	generateManifestStream, err := cmpClient.GenerateManifest(ctx, grpc_retry.Disable())
 	if err != nil {
 		return nil, fmt.Errorf("error getting generateManifestStream: %w", err)
@@ -1945,7 +1947,7 @@ func generateManifestsCMP(ctx context.Context, appPath, repoPath string, env []s
 		cmp.WithTarDoneChan(tarDoneCh),
 	}
 
-	err = cmp.SendRepoStream(generateManifestStream.Context(), appPath, repoPath, generateManifestStream, env, tarExcludedGlobs, opts...)
+	err = cmp.SendRepoStream(generateManifestStream.Context(), appPath, repoPath, generateManifestStream, env, tarExcludedGlobs, tarIncludeFileGlobs, opts...)
 	if err != nil {
 		return nil, fmt.Errorf("error sending file to cmp-server: %s", err)
 	}
@@ -2168,7 +2170,7 @@ func populatePluginAppDetails(ctx context.Context, res *apiclient.RepoAppDetails
 		return fmt.Errorf("error getting generateManifestStream: %w", err)
 	}
 
-	err = cmp.SendRepoStream(generateManifestStream.Context(), appPath, repoPath, generateManifestStream, env, tarExcludedGlobs)
+	err = cmp.SendRepoStream(generateManifestStream.Context(), appPath, repoPath, generateManifestStream, env, tarExcludedGlobs, nil)
 	if err != nil {
 		return fmt.Errorf("error sending file to cmp-server: %s", err)
 	}

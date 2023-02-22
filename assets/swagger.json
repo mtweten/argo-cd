@@ -6155,6 +6155,12 @@
           "items": {
             "$ref": "#/definitions/v1alpha1ApplicationSourcePluginParameter"
           }
+        },
+        "tarIncludeFileGlobs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

@@ -471,6 +471,8 @@ message ApplicationSourcePlugin {
   repeated EnvEntry env = 2;
 
   repeated ApplicationSourcePluginParameter parameters = 3;
+
+  repeated string tarIncludeFileGlobs = 4;
 }
 
 message ApplicationSourcePluginParameter {

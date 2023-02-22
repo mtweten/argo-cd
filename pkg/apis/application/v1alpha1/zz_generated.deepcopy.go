@@ -1004,6 +1004,11 @@ func (in *ApplicationSourcePlugin) DeepCopyInto(out *ApplicationSourcePlugin) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.TarIncludeFileGlobs != nil {
+		in, out := &in.TarIncludeFileGlobs, &out.TarIncludeFileGlobs
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	return
 }
 

@@ -131,7 +131,8 @@ func matchRepositoryCMP(ctx context.Context, repoPath string, client pluginclien
 		return false, false, fmt.Errorf("error getting stream client: %s", err)
 	}
 
-	err = cmp.SendRepoStream(ctx, repoPath, repoPath, matchRepoStream, env, tarExcludedGlobs)
+	// TODO included globs
+	err = cmp.SendRepoStream(ctx, repoPath, repoPath, matchRepoStream, env, tarExcludedGlobs, nil)
 	if err != nil {
 		return false, false, fmt.Errorf("error sending stream: %s", err)
 	}
@@ -158,6 +159,16 @@ func cmpSupports(ctx context.Context, pluginSockFilePath, repoPath, fileName str
 			common.SecurityCWEField: 775,
 		}).Errorf("error dialing to cmp-server for plugin %s, %v", fileName, err)
 		return nil, nil, false
+	}
+
+	// Ask the sidecar if discovery is enabled first. If it's not, and plugin name is specified, allow using the plugin without having to send the compressed repository.
+	discoveryEnabledResp, err := cmpClient.GetDiscoveryEnabled(ctx, &pluginclient.DiscoveryEnabledRequest{}, grpc_retry.Disable())
+	if err != nil {
+		// TODO don't know that we actually need to return here.
+	}
+
+	if !discoveryEnabledResp.IsDiscoveryEnabled && namedPlugin {
+		return conn, cmpClient, true
 	}
 
 	isSupported, isDiscoveryEnabled, err := matchRepositoryCMP(ctx, repoPath, cmpClient, env, tarExcludedGlobs)

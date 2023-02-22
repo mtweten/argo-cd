@@ -13,11 +13,13 @@ import (
 )
 
 type tgz struct {
-	srcPath      string
-	inclusions   []string
-	exclusions   []string
-	tarWriter    *tar.Writer
-	filesWritten int
+	srcPath           string
+	inclusions        []string
+	exclusions        []string
+	includedDirs      []string
+	includedFileGlobs []string
+	tarWriter         *tar.Writer
+	filesWritten      int
 }
 
 // Tgz will iterate over all files found in srcPath compressing them with gzip
@@ -25,7 +27,7 @@ type tgz struct {
 // This is useful to generate checksums. Will exclude files matching the exclusions
 // list blob if exclusions is not nil. Will include only the files matching the
 // inclusions list if inclusions is not nil.
-func Tgz(srcPath string, inclusions []string, exclusions []string, writers ...io.Writer) (int, error) {
+func Tgz(srcPath string, inclusions []string, exclusions []string, includedFileGlobs []string, writers ...io.Writer) (int, error) {
 	if _, err := os.Stat(srcPath); err != nil {
 		return 0, fmt.Errorf("error inspecting srcPath %q: %w", srcPath, err)
 	}
@@ -38,12 +40,20 @@ func Tgz(srcPath string, inclusions []string, exclusions []string, writers ...io
 	tw := tar.NewWriter(gzw)
 	defer tw.Close()
 
-	t := &tgz{
-		srcPath:    srcPath,
-		inclusions: inclusions,
-		exclusions: exclusions,
-		tarWriter:  tw,
+	var includedDirs []string
+	for _, includedFileGlob := range includedFileGlobs {
+		includedDirs = append(includedDirs, filepath.Dir(includedFileGlob))
 	}
+
+	t := &tgz{
+		srcPath:           srcPath,
+		inclusions:        inclusions,
+		exclusions:        exclusions,
+		includedDirs:      includedDirs,
+		includedFileGlobs: includedFileGlobs,
+		tarWriter:         tw,
+	}
+
 	err := filepath.Walk(srcPath, t.tgzFile)
 
 	if err != nil {
@@ -147,6 +157,42 @@ func (t *tgz) tgzFile(path string, fi os.FileInfo, err error) error {
 	relativePath, err := RelativePath(path, t.srcPath)
 	if err != nil {
 		return fmt.Errorf("relative path error: %s", err)
+	}
+	
+	// If this is a directory, but not in a path to be included, we can skip the directory entirely.
+	// TODO probably some more specific globbing stuff we need to be concerned about.
+	if t.includedDirs != nil && fi.IsDir() {
+		included := false
+		for _, includedDir := range t.includedDirs {
+			if includedDir == relativePath {
+				log.Debug("directory is included.. continuing", "directory", fi.Name())
+
+				included = true
+				break
+			}
+		}
+		if !included {
+			log.Debug("directory not included.. skipping", "directory", fi.Name())
+
+			return filepath.SkipDir
+		}
+	}
+
+	if t.includedFileGlobs != nil && !fi.IsDir() {
+		included := false
+		for _, inclusionPattern := range t.includedFileGlobs {
+			found, err := filepath.Match(inclusionPattern, relativePath)
+			if err != nil {
+				return fmt.Errorf("error verifying inclusion pattern %q: %w", inclusionPattern, err)
+			}
+			if found {
+				included = true
+				break
+			}
+		}
+		if !included {
+			return nil
+		}
 	}
 
 	if t.inclusions != nil && base != "." && !fi.IsDir() {
