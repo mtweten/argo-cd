@@ -42,7 +42,8 @@ func Tgz(srcPath string, inclusions []string, exclusions []string, includedFileG
 
 	var includedDirs []string
 	for _, includedFileGlob := range includedFileGlobs {
-		includedDirs = append(includedDirs, filepath.Dir(includedFileGlob))
+		// TODO remove duplicates
+		includedDirs = append(includedDirs, filepath.Clean(filepath.Dir(includedFileGlob)))
 	}
 
 	t := &tgz{
@@ -59,6 +60,8 @@ func Tgz(srcPath string, inclusions []string, exclusions []string, includedFileG
 	if err != nil {
 		return 0, err
 	}
+
+	log.Debugf("FILES WRITTEN: %v", t.filesWritten)
 
 	return t.filesWritten, nil
 }
@@ -158,21 +161,19 @@ func (t *tgz) tgzFile(path string, fi os.FileInfo, err error) error {
 	if err != nil {
 		return fmt.Errorf("relative path error: %s", err)
 	}
-	
+
 	// If this is a directory, but not in a path to be included, we can skip the directory entirely.
 	// TODO probably some more specific globbing stuff we need to be concerned about.
 	if t.includedDirs != nil && fi.IsDir() {
 		included := false
 		for _, includedDir := range t.includedDirs {
-			if includedDir == relativePath {
-				log.Debug("directory is included.. continuing", "directory", fi.Name())
+			if _, err := RelativePath(includedDir, relativePath); err == nil {
 
 				included = true
 				break
 			}
 		}
 		if !included {
-			log.Debug("directory not included.. skipping", "directory", fi.Name())
 
 			return filepath.SkipDir
 		}

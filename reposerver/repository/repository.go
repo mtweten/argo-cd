@@ -1982,7 +1982,8 @@ func (s *Service) GetAppDetails(ctx context.Context, q *apiclient.RepoServerAppD
 				return err
 			}
 		case v1alpha1.ApplicationSourceTypePlugin:
-			if err := populatePluginAppDetails(ctx, res, opContext.appPath, repoRoot, q, s.gitCredsStore, s.initConstants.CMPTarExcludedGlobs); err != nil {
+
+			if err := populatePluginAppDetails(ctx, res, opContext.appPath, repoRoot, q, s.gitCredsStore, s.initConstants.CMPTarExcludedGlobs, q.Source.Plugin.TarIncludeFileGlobs); err != nil {
 				return fmt.Errorf("failed to populate plugin app details: %w", err)
 			}
 		}
@@ -2137,7 +2138,7 @@ func populateKustomizeAppDetails(res *apiclient.RepoAppDetailsResponse, q *apicl
 	return nil
 }
 
-func populatePluginAppDetails(ctx context.Context, res *apiclient.RepoAppDetailsResponse, appPath string, repoPath string, q *apiclient.RepoServerAppDetailsQuery, store git.CredsStore, tarExcludedGlobs []string) error {
+func populatePluginAppDetails(ctx context.Context, res *apiclient.RepoAppDetailsResponse, appPath string, repoPath string, q *apiclient.RepoServerAppDetailsQuery, store git.CredsStore, tarExcludedGlobs []string, tarIncludeFileGlobs []string) error {
 	res.Plugin = &apiclient.PluginAppSpec{}
 
 	creds := q.Repo.GetGitCreds(store)
@@ -2170,7 +2171,7 @@ func populatePluginAppDetails(ctx context.Context, res *apiclient.RepoAppDetails
 		return fmt.Errorf("error getting generateManifestStream: %w", err)
 	}
 
-	err = cmp.SendRepoStream(generateManifestStream.Context(), appPath, repoPath, generateManifestStream, env, tarExcludedGlobs, nil)
+	err = cmp.SendRepoStream(generateManifestStream.Context(), appPath, repoPath, generateManifestStream, env, tarExcludedGlobs, tarIncludeFileGlobs)
 	if err != nil {
 		return fmt.Errorf("error sending file to cmp-server: %s", err)
 	}
